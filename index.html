@@ -317,3 +317,49 @@ function loadDua() {
 
 </body>
 </html>
+<script>
+function updateRamadanDay() {
+  // رمضان 2026 start date (adjust if moon sighting differs)
+  const ramadanStart = new Date(2026, 1, 18); // Feb = 1
+  const today = new Date();
+
+  // Remove time part
+  ramadanStart.setHours(0,0,0,0);
+  today.setHours(0,0,0,0);
+
+  const diffDays = Math.floor(
+    (today - ramadanStart) / (1000 * 60 * 60 * 24)
+  ) + 1;
+
+  const statusEl = document.getElementById("ramadanStatus");
+  const dayEl = document.getElementById("ramadanDayText");
+  const timeEl = document.getElementById("todayTimes");
+
+  if (diffDays < 1) {
+    statusEl.innerText = "🌙 Ramadan has not started yet";
+    dayEl.innerText = "";
+    timeEl.innerText = "";
+    return;
+  }
+
+  if (diffDays > 30) {
+    statusEl.innerText = "🌙 Ramadan has completed";
+    dayEl.innerText = "";
+    timeEl.innerText = "";
+    return;
+  }
+
+  // Ramadan ongoing
+  statusEl.innerText = "🌙 Ramadan Ongoing";
+  dayEl.innerText = `Today is Ramadan Day ${diffDays}`;
+
+  // Use selected city timings
+  const cityKey = document.getElementById("city")?.value || "ahmedabad";
+  const times = TIMES[cityKey];
+
+  timeEl.innerText = `🌅 Sehri: ${times.s} | 🌇 Iftar: ${times.i}`;
+}
+
+// Run on load
+updateRamadanDay();
+</script>
