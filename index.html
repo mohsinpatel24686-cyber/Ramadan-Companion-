@@ -363,3 +363,17 @@ function updateRamadanDay() {
 // Run on load
 updateRamadanDay();
 </script>
+<script>
+function scheduleMidnightUpdate() {
+  const now = new Date();
+  const midnight = new Date();
+  midnight.setHours(24, 0, 0, 0);
+
+  setTimeout(() => {
+    updateRamadanDay();
+    scheduleMidnightUpdate();
+  }, midnight - now);
+}
+
+scheduleMidnightUpdate();
+</script>
