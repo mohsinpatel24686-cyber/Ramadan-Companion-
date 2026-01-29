@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ramadan Companion 2026</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(#020617, #0f172a);
+  color: #fff;
+}
+
+header {
+  padding: 14px;
+  text-align: center;
+  background: #020617;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  background: #020617;
+}
+
+.tabs button {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #cbd5f5;
+  padding: 12px;
+  font-size: 13px;
+}
+
+.tabs button.active {
+  color: #22c55e;
+  border-bottom: 2px solid #22c55e;
+}
+
+main {
+  padding: 15px;
+}
+
+section {
+  display: none;
+}
+
+section.active {
+  display: block;
+}
+
+.card {
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 14px;
+  margin-bottom: 15px;
+}
+
+button.main {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #22c55e;
+  color: #000;
+  font-size: 16px;
+  margin-top: 8px;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+
+.big {
+  font-size: 40px;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<header>🕌 Ramadan Companion 2026</header>
+
+<div class="tabs">
+  <button class="active" onclick="showTab('home',this)">Home</button>
+  <button onclick="showTab('calendar',this)">Calendar</button>
+  <button onclick="showTab('quran',this)">Quran</button>
+  <button onclick="showTab('zikr',this)">Zikr</button>
+  <button onclick="showTab('zakat',this)">Zakat</button>
+  <button onclick="showTab('qibla',this)">Qibla</button>
+  <button onclick="showTab('dua',this)">Dua</button>
+</div>
+
+<main>
+
+<!-- HOME -->
+<section id="home" class="active">
+  <div class="card">
+    <h3>Welcome</h3>
+    <p>A simple Ramadan web app for daily use.</p>
+  </div>
+</section>
+
+<!-- CALENDAR -->
+<section id="calendar">
+  <div class="card">
+    <h3>📅 Ramadan Calendar (Sample)</h3>
+    <p>Default timings shown</p>
+    <div id="calendarList"></div>
+  </div>
+</section>
+
+<!-- QURAN -->
+<section id="quran">
+  <div class="card">
+    <h3>📖 Daily Quran Recitation</h3>
+    <p id="quranDay"></p>
+    <p id="quranJuz"></p>
+    <button class="main" onclick="nextQuran()">Mark as Done</button>
+  </div>
+</section>
+
+<!-- ZIKR -->
+<section id="zikr">
+  <div class="card">
+    <h3>📿 Zikr Counter</h3>
+    <select id="zikrType" onchange="changeZikr()">
+      <option>SubhanAllah</option>
+      <option>Alhamdulillah</option>
+      <option>Allahu Akbar</option>
+      <option>Durood Sharif</option>
+      <option>Custom</option>
+    </select>
+    <input id="customZikr" placeholder="Custom zikr" style="display:none;">
+    <p id="zikrName" style="text-align:center;margin-top:10px;"></p>
+    <div class="big" id="zikrCount">0</div>
+    <button class="main" onclick="addZikr()">Tap</button>
+    <button class="main" style="background:#ef4444;color:#fff;" onclick="resetZikr()">Reset</button>
+  </div>
+</section>
+
+<!-- ZAKAT -->
+<section id="zakat">
+  <div class="card">
+    <h3>💰 Zakat Calculator</h3>
+    <input id="cash" placeholder="Cash / Bank Amount">
+    <input id="gold" placeholder="Gold (grams)">
+    <input id="silver" placeholder="Silver (grams)">
+    <input id="liabilities" placeholder="Liabilities">
+    <button class="main" onclick="calcZakat()">Calculate</button>
+    <p id="zakatResult"></p>
+  </div>
+</section>
+
+<!-- QIBLA -->
+<section id="qibla">
+  <div class="card">
+    <h3>🧭 Qibla Direction</h3>
+    <button class="main" onclick="findQibla()">Find Qibla</button>
+    <div class="big" id="qiblaArrow">⬆️</div>
+    <p id="qiblaText"></p>
+  </div>
+</section>
+
+<!-- DUA -->
+<section id="dua">
+  <div class="card">
+    <h3>🤲 Dua of the Day</h3>
+    <p id="duaText"></p>
+  </div>
+</section>
+
+</main>
+
+<script>
+// ---------- NAV ----------
+function showTab(id, btn) {
+  document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  if (id === "calendar") loadCalendar();
+  if (id === "quran") loadQuran();
+  if (id === "dua") loadDua();
+}
+
+// ---------- CALENDAR (SAFE FALLBACK) ----------
+const ramadan = [
+  { d:1, date:"18 Feb 2026", s:"05:18 AM", i:"06:42 PM" },
+  { d:2, date:"19 Feb 2026", s:"05:17 AM", i:"06:43 PM" },
+  { d:3, date:"20 Feb 2026", s:"05:16 AM", i:"06:44 PM" }
+];
+
+function loadCalendar() {
+  calendarList.innerHTML = "";
+  ramadan.forEach(r => {
+    calendarList.innerHTML += `
+      <div class="card">
+        <b>Day ${r.d}</b> – ${r.date}<br>
+        🌅 Sehri: ${r.s}<br>
+        🌇 Iftar: ${r.i}
+      </div>`;
+  });
+}
+
+// ---------- QURAN ----------
+const juz = Array.from({length:30}, (_,i)=>"Juz " + (i+1));
+let qDay = Number(localStorage.getItem("qDay")) || 1;
+
+function loadQuran() {
+  quranDay.innerText = "Day " + qDay;
+  quranJuz.innerText = juz[qDay - 1];
+}
+
+function nextQuran() {
+  if (qDay < 30) qDay++;
+  localStorage.setItem("qDay", qDay);
+  loadQuran();
+}
+
+// ---------- ZIKR ----------
+let zikr = localStorage.getItem("zikr") || "SubhanAllah";
+let zcount = Number(localStorage.getItem("zcount")) || 0;
+
+function changeZikr() {
+  const v = zikrType.value;
+  customZikr.style.display = v === "Custom" ? "block" : "none";
+  if (v !== "Custom") {
+    zikr = v; zcount = 0; saveZikr();
+  }
+}
+
+customZikr.onchange = e => {
+  zikr = e.target.value || "Custom";
+  zcount = 0;
+  saveZikr();
+};
+
+function addZikr() {
+  zcount++;
+  navigator.vibrate?.(30);
+  saveZikr();
+}
+
+function resetZikr() {
+  zcount = 0;
+  saveZikr();
+}
+
+function saveZikr() {
+  zikrName.innerText = zikr;
+  zikrCount.innerText = zcount;
+  localStorage.setItem("zikr", zikr);
+  localStorage.setItem("zcount", zcount);
+}
+
+saveZikr();
+
+// ---------- ZAKAT ----------
+function calcZakat() {
+  const total =
+    (+cash.value||0) +
+    (+gold.value||0)*6000 +
+    (+silver.value||0)*75 -
+    (+liabilities.value||0);
+
+  const zakat = total > 0 ? total * 0.025 : 0;
+  zakatResult.innerText = "Zakat Payable: ₹" + zakat.toFixed(2);
+}
+
+// ---------- QIBLA ----------
+function findQibla() {
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude * Math.PI/180;
+      const lon = pos.coords.longitude * Math.PI/180;
+      const kl = 21.4225 * Math.PI/180;
+      const klo = 39.8262 * Math.PI/180;
+
+      let b = Math.atan2(
+        Math.sin(klo-lon),
+        Math.cos(lat)*Math.tan(kl) - Math.sin(lat)*Math.cos(klo-lon)
+      ) * 180/Math.PI;
+
+      b = (b + 360) % 360;
+      qiblaArrow.style.transform = `rotate(${b}deg)`;
+      qiblaText.innerText = "Qibla direction: " + b.toFixed(1) + "° from North";
+    },
+    () => alert("Please allow location access")
+  );
+}
+
+// ---------- DUA ----------
+const duas = [
+  "رَبِّ اغْفِرْ لِي – My Lord, forgive me",
+  "رَبِّ زِدْنِي عِلْمًا – Increase me in knowledge",
+  "اللّهُمَّ إِنَّكَ عَفُوٌّ – O Allah, You are Forgiving"
+];
+
+function loadDua() {
+  duaText.innerText = duas[new Date().getDate() % duas.length];
+}
+</script>
+
+</body>
+</html>
